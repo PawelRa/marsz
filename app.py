@@ -7,6 +7,35 @@ st.title("Analiza półmaratonu wrocławskiego 2024")
 
 df = pd.read_csv("halfmarathon_wroclaw_2024__final.csv", sep=";")
 
+with st.sidebar:
+    name = st.text_input("Podaj imię zawodnika")
+    countries = st.multiselect(
+        "Wybierz kraj",
+        sorted(df["Kraj"].dropna().unique())
+    )
+    age_categories = st.multiselect(
+        "Wybierz kategorię wiekową",
+        sorted(df["Kategoria wiekowa"].dropna().unique())
+    )
+    gender = st.radio(
+        "Wybierz płeć",
+        ["Wszyscy", "Mężczyźni", "Kobiety"],
+    )
+
+if name:
+    df = df[df["Imię"].str.contains(name, case=False)]
+
+if countries:
+    df = df[df["Kraj"].isin(countries)]
+
+if age_categories:
+    df = df[df["Kategoria wiekowa"].isin(age_categories)]
+
+if gender == "Mężczyźni":
+    df = df[df["Płeć"] == "M"]
+elif gender == "Kobiety":
+    df = df[df["Płeć"] == "K"]
+
 #Liczba zawodników
 c0, c1, c2 = st.columns(3)
 with c0:
@@ -23,15 +52,16 @@ with c2:
 #10 losowych wierszy
 #st. write("## 10 losowych wierszy")
 st.header("10 losowych wierszy")
+x = min(10, len(df))
 st.dataframe(
-    df.sample(10),
+    df.sample(x),
     use_container_width=True,
     hide_index=True
 )
 
 #TOP 5 zawodników
 st.header("TOP 5 zawodników")
-top_columns = ["Miejsce", "Numer startowy", "Nazwisko", "Miasto", "Kraj", "Czas"]
+top_columns = ["Miejsce", "Numer startowy", "Imię", "Nazwisko", "Miasto", "Kraj", "Czas"]
 st.dataframe(
     df.sort_values("Miejsce")[top_columns].head(5),
     hide_index=True,
